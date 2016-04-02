@@ -1,7 +1,4 @@
-out_directory = '.'
 run = as.numeric(commandArgs(t=T)[1])
-out_directory = sprintf('Run_%f',run)
-try(dir.create(out_directory))
 
 library(deSolve)
 library(GenSA)
@@ -238,7 +235,7 @@ obj_fun4_helper <- function(params) {
   return(score)
 }
 
-out <- GenSA(op_parms, obj_fun4_helper, lower = low, upper = upp, control = list(temperature = 100, visiting.param = 2.99, acceptance.param = -1, maxit = 10))
+out <- GenSA(op_parms, obj_fun4_helper, lower = low, upper = upp, control = list(temperature = 100, visiting.param = 2.99, acceptance.param = -1, maxit = 1000000))
 dat <- data.frame(out)
 data_final <- cbind(names(op_parms5), op_parms, dat)
 write.csv(data_final, file = sprintf("Run_%f.csv", run))
