@@ -54,7 +54,25 @@ baa2 <- list(
 )
 
 baa2$init <- init
-
+parms_ori1 = list(
+  K_13 = 0.39381,
+  K_23 = 3.2556,
+  K_4_3 = 0.28203,
+  K_23_4 = 9.3767,
+  K_13_4 = 0.040555,
+  K_23_5 = 0.033666,
+  K_13_5 = 0.029081,
+  K_4_5 = 0.13032,
+  K_5_4 = 0.28606,
+  h_4_3 = 4.00,
+  h_23_4 = 3.8497,
+  h_13_4 = 4.00,
+  h_23_5 = 4.00,
+  h_13_5 = 1.8217,
+  h_4_5 = 3.9369,
+  h_5_4 = 3.6732,
+  h_5_2 = 1.0239
+)
 parms_ori = list(
   K_13 = 0.39381,
   K_23 = 3.2556,
@@ -218,7 +236,7 @@ obj_fun4_helper <- function(params) {
   names(j) <- names(op_parms5)
   counter <<- counter + 1
   # k <- length(subset(params, c(params < 0.001, params > 10))) * 100
-  data_model <- read.delim('Jaeger_data_New.csv',sep=',')
+  data_model <- read.delim('Jaeger_data_no_triple.csv',sep=',')
   data_model$pred_R = NA
   data_model$pred_C = NA
   
@@ -231,11 +249,14 @@ obj_fun4_helper <- function(params) {
   
   data_model[is.na(data_model)] <- 50
   score <- sum((data_model$Ros_Exp - data_model$pred_R)^2) #+ (data_model$Caul_Exp - data_model$pred_C)^2)
-  print(c(unlist(j), score, counter))
+  out_line <- as.vector(unlist(c(j, score, counter)))
+  data_out <- as.data.frame(t(unname(out_line)))
+  write.table(data_out, file = sprintf("full_run%f.csv", run), append = TRUE, sep = ",", col.names = FALSE)
+  print(out_line)
   return(score)
 }
 
-out <- GenSA(op_parms, obj_fun4_helper, lower = low, upper = upp, control = list(temperature = 100, visiting.param = 2.99, acceptance.param = -1, maxit = 1000000))
+out <- GenSA(op_parms, obj_fun4_helper, lower = low, upper = upp, control = list(temperature = 100, maxit = 1000000))
 dat <- data.frame(out)
 data_final <- cbind(names(op_parms5), op_parms, dat)
-write.csv(data_final, file = sprintf("Run_%f.csv", run))
+write.csv(data_final, file = sprintf("run_%f.csv", run))
