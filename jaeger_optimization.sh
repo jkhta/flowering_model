@@ -1,7 +1,7 @@
 #! /bin/bash -l
 #SBATCH -D /home/jkta/projects/jaeger
-#SBATCH -o /home/jkta/projects/jaeger/logs/out-%j.txt
-#SBATCH -e /home/jkta/projects/jaeger/logs/error-%j.txt
+#SBATCH -o /home/jkta/projects/jaeger/logs/output/out-%j.txt
+#SBATCH -e /home/jkta/projects/jaeger/logs/error/error-%j.txt
 #SBATCH -J jaeger_opt
 
 module load R
