@@ -248,7 +248,7 @@ obj_fun4_helper <- function(params) {
   }
   
   data_model[is.na(data_model)] <- 50
-  score <- sum((data_model$Ros_Exp - data_model$pred_R)^2) #+ (data_model$Caul_Exp - data_model$pred_C)^2)
+  score <- sum((data_model$Ros_Exp - data_model$pred_R)^2 + (data_model$Caul_Exp - data_model$pred_C)^2)
   out_line <- as.vector(unlist(c(j, score, counter)))
   data_out <- as.data.frame(t(unname(out_line)))
   write.table(data_out, file = sprintf("full_run%f.csv", run), append = TRUE, sep = ",", col.names = FALSE)
