@@ -80,8 +80,8 @@ jaeger_model = function(t,X,parms=NULL,...){
 
 time_scale = 1  # shifts the timescale by scaling both delta and vs and eta_leaf
 time_scale2 = 3
-init = c(0,0.6,.1,0.1,0,0,1) # Starts with some FD and LFY, and with a leaf production rate = 1 per unit t.
-t = seq(0,50,by=0.1)
+init = c(0,0,0.1,0.1,0,0,1) # Starts with some FD and LFY, and with a leaf production rate = 1 per unit t.
+t = seq(0,200,by=0.1)
 
 v_lfy = 0.05;v_ap1 = 0.05
 

@@ -139,11 +139,11 @@ eventsdat = data.frame(var=c(1,2),time=10,value=c(1,0),method='rep')
 
 # eventsfun is called whenever a root is reached 
 eventsfun = function(t,y,parms,...){
-  # if(y[5] > 0.2) y[7] = 0
+  if(y[5] > 0.3) y[7] = 0
   y
 }
 
-terminalroot = 2 # The 2nd root causes the simulation to stop
+terminalroot = 3 # The 2nd root causes the simulation to stop
 
 fit_model_new = function(parms){
   s1 <- ode(y = c(parms$init),
@@ -162,60 +162,75 @@ predict_leaves = function(parms){
   return(attributes(s1)[['troot']])
 }
 
+
 genotype_parms = function(genotype,parms){
-  new_parms <<- parms #parms
-  new_parms$init <- init
+  new_parms <- parms #parms
   #Col 					#check
   if(genotype == '35S:FT'){ #check
     new_parms$v_35S[1] = exp_35S #1.3-1.8
+    new_parms$init <- c(10, 0.6, 0.1, 0.1, 0, 0, 0)
   }
   if(genotype == '35S:LFY'){
     new_parms$v_35S[4] = exp_35S #nothing gets is fast enough (minimum = 5 Ros leaves)
+    new_parms$init <- c(0, 0.6, 0.1, 10.1, 0, 0, 1)
   }
   if(genotype == '35S:TFL1'){ #not with this parameter
     new_parms$v_35S[2] = exp_35S #1
+    new_parms$init <- c(0, 10.7, 0.1, 0.1, 0, 0, 1)
   }
   if(genotype == 'lfy-12'){   #check
     new_parms$mutants[4] = 1
+    new_parms$init <- c(0, 0, 0.1, 0, 0, 0, 1)
   }
   if(genotype == 'ft-10'){	#check
     new_parms$mutants[1] = 1
+    new_parms$init <- c(0, 0, 0.1, 0.1, 0, 0, 1)
   }
   if(genotype == 'tfl-1'){   #check
     new_parms$mutants[2] = 1
+    new_parms$init <- c(0, 0, 0.1, 0.1, 0, 0, 1)
   }
   if(genotype == 'fd-2'){    #check
-    new_parms$mutants[3] = 0.81
+    new_parms$mutants[3] = 0.75
+    new_parms$init <- c(0, 0, 0.025, 0.1, 0, 0, 1)
   }
   if(genotype == 'fdp-1'){   #check
-    new_parms$mutants[3] = 0.3
+    new_parms$mutants[3] = 0.2
+    new_parms$init <- c(0, 0, 0.08, 0.1, 0, 0, 1)
   }
   if(genotype == 'fd-2 fdp-1'){   #check
     new_parms$mutants[3] = 0.95
+    new_parms$init <- c(0, 0, 0.005, 0.1, 0, 0, 1)
   }
   if(genotype == '35S:TFL1 fd-2'){  #check, exp_35S = 1
     new_parms$v_35S[2] = exp_35S
-    new_parms$mutants[3] = 0.81
+    new_parms$mutants[3] = 0.75
+    new_parms$init <- c(0, 10.1, 0.025, 0.1, 0, 0, 1)
   }
   if(genotype == 'tfl1-1 fd-2'){   #check
     new_parms$mutants[2] = 1
-    new_parms$mutants[3] = 0.81
+    new_parms$mutants[3] = 0.75
+    new_parms$init <- c(0, 0, 0.025, 0.1, 0, 0, 1)
   }
   if(genotype == '35S:FT fd-2'){   #check at exp_35S = 1.0
     new_parms$v_35S[1] = exp_35S
-    new_parms$mutants[3] = 0.81
+    new_parms$mutants[3] = 0.75
+    new_parms$init <- c(10, 0, 0.025, 0.1, 0, 0, 1)
   }
   if(genotype == 'tfl1-1 fd-2 fdp-1'){  #check
     new_parms$mutants[2] = 1
     new_parms$mutants[3] = .95
+    # new_parms$init <- c(0, 0.6, 0.1, 0.1, 0, 0, 1)
   }
   if(genotype == '35S:TFL1 fd-2 fdp-1'){  #check
     new_parms$v_35S[2] = exp_35S
     new_parms$mutants[3] = .95
+    new_parms$init <- c(0, 10.7, 0.1, 0.1, 0, 0, 1)
   }
   if(genotype == '35S:FT fd-2 fdp-1'){  #check, regardless of exp_35S
     new_parms$v_35S[1] = exp_35S
     new_parms$mutants[3] = .95
+    new_parms$init <- c(10, 0.1, 0.1, 0.1, 0, 0, 1)
   }
   return(new_parms)
 }
