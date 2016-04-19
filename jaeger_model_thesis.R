@@ -3,6 +3,7 @@ library(GenSA)
 library(Rcpp)
 
 setwd("/Users/jkhta/flowering_model/")
+
 sourceCpp("Silly.cpp")
 
 jaeger_model = function(t,X,parms=NULL,...){
@@ -79,7 +80,7 @@ jaeger_model = function(t,X,parms=NULL,...){
 
 time_scale = 1  # shifts the timescale by scaling both delta and vs and eta_leaf
 
-init = c(0, 0.1, 0.1, 0.1, 0, 0, 1) # Starts with some FD and LFY, and with a leaf production rate = 1 per unit t.
+init = c(0, 0.6, 0.1, 0.1, 0, 0, 1) # Starts with some FD and LFY, and with a leaf production rate = 1 per unit t.
 t = seq(0,200,by=0.1)
 
 v_lfy = 0.05;v_ap1 = 0.05
@@ -199,6 +200,7 @@ exp_35S = 1
 
 genotype_parms = function(genotype,parms){
   new_parms <- parms #parms
+  new_parms$init <- init
   #Col 					#check
   if(genotype == '35S:FT'){ #check
     new_parms$v_35S[1] = exp_35S #1.3-1.8
@@ -214,11 +216,11 @@ genotype_parms = function(genotype,parms){
   }
   if(genotype == 'lfy-12'){   #check
     new_parms$mutants[4] = 1
-    new_parms$init <- c(0, 0, 0.1, 0, 0, 0, 1)
+    new_parms$init <- c(0, 0.6, 0.1, 0, 0, 0, 1)
   }
   if(genotype == 'ft-10'){	#check
     new_parms$mutants[1] = 1
-    new_parms$init <- c(0, 0, 0.1, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 0.6, 0.1, 0.1, 0, 0, 1)
   }
   if(genotype == 'tfl-1'){   #check
     new_parms$mutants[2] = 1
@@ -226,20 +228,20 @@ genotype_parms = function(genotype,parms){
   }
   if(genotype == 'fd-2'){    #check
     new_parms$mutants[3] = 0.75
-    new_parms$init <- c(0, 0, 0.025, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 0.6, 0.025, 0.1, 0, 0, 1)
   }
   if(genotype == 'fdp-1'){   #check
     new_parms$mutants[3] = 0.2
-    new_parms$init <- c(0, 0, 0.08, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 0.6, 0.08, 0.1, 0, 0, 1)
   }
   if(genotype == 'fd-2 fdp-1'){   #check
     new_parms$mutants[3] = 0.95
-    new_parms$init <- c(0, 0, 0.005, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 0.6, 0.005, 0.1, 0, 0, 1)
   }
   if(genotype == '35S:TFL1 fd-2'){  #check, exp_35S = 1
     new_parms$v_35S[2] = exp_35S
     new_parms$mutants[3] = 0.75
-    new_parms$init <- c(0, 10.1, 0.025, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 10.7, 0.025, 0.1, 0, 0, 1)
   }
   if(genotype == 'tfl1-1 fd-2'){   #check
     new_parms$mutants[2] = 1
@@ -249,35 +251,24 @@ genotype_parms = function(genotype,parms){
   if(genotype == '35S:FT fd-2'){   #check at exp_35S = 1.0
     new_parms$v_35S[1] = exp_35S
     new_parms$mutants[3] = 0.75
-    new_parms$init <- c(10, 0, 0.025, 0.1, 0, 0, 1)
+    new_parms$init <- c(10, 0.6, 0.025, 0.1, 0, 0, 1)
   }
   if(genotype == 'tfl1-1 fd-2 fdp-1'){  #check
     new_parms$mutants[2] = 1
     new_parms$mutants[3] = .95
-    # new_parms$init <- c(0, 0.6, 0.1, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 0.6, 0.005, 0.1, 0, 0, 1)
   }
   if(genotype == '35S:TFL1 fd-2 fdp-1'){  #check
     new_parms$v_35S[2] = exp_35S
     new_parms$mutants[3] = .95
-    new_parms$init <- c(0, 10.7, 0.1, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 10.7, 0.005, 0.1, 0, 0, 1)
   }
   if(genotype == '35S:FT fd-2 fdp-1'){  #check, regardless of exp_35S
     new_parms$v_35S[1] = exp_35S
     new_parms$mutants[3] = .95
-    new_parms$init <- c(10, 0.1, 0.1, 0.1, 0, 0, 1)
+    new_parms$init <- c(10, 0.1, 0.005, 0.1, 0, 0, 1)
   }
   return(new_parms)
-}
-
-data_model = read.delim('Jaeger_data_New.csv',sep=',')
-data_model$pred_R = NA
-data_model$pred_C = NA
-
-for(gen in data_model$Genotype){
-  i = data_model$Genotype == gen
-  pred = predict_genotype(gen,parms_ori)*time_scale
-  data_model$pred_R[i] = pred[1]
-  data_model$pred_C[i] = pred[2]-pred[1]
 }
 
 #Predicts leaf number for various genotypes
