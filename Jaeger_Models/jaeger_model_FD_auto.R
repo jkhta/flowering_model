@@ -26,7 +26,11 @@ jaeger_model = function(t,X,parms=NULL,...){
     
     #Hub Gene Activation
     #LFY -> FD
-    p_4_3 = X[4]^h_4_3 / (K_4_3^h_4_3 + X[4]^h_4_3)
+    p_5_2 <- T_f^h_5_2/(T_f^h_5_2 + X[5]^h_5_2)
+    p_4_2 <- K_4_2^h_4_2/(K_4_2^h_4_2 + X[4]^h_4_2)
+    p_13_3 <- x_13^h_13_3/(K_13_3^h_13_3 + x_13^h_13_3)
+    
+    # p_4_3 = X[4]^h_4_3 / (K_4_3^h_4_3 + X[4]^h_4_3)
     #FT:FD -> LFY
     p_13_4 = K_23_4^h_23_4 * x_13^h_13_4 / (K_13_4^h_13_4 * K_23_4^h_23_4 + K_23_4^h_23_4*x_13^h_13_4 + K_13_4^h_13_4*x_23^h_23_4)
     #TFL1:FD -> LFY
@@ -40,13 +44,12 @@ jaeger_model = function(t,X,parms=NULL,...){
     #LFY -> AP1
     p_4_5 = X[4]^h_4_5 / (K_4_5^h_4_5 + X[4]^h_4_5)
     
-    
     rho = matrix(0,nr=5,nc=3)
     rho[,1] = 1
     
     rho[1,1] = 1; rho[1,2] = 0; rho[1,3] = 0
-    rho[2,2] = T_f^h_5_2 / (T_f^h_5_2  + X[5]^h_5_2); rho[2,3] = 0; rho[2,1] = 1 - rho[2,2] # should this be in there? Otherwise it doesn't sum to 1; 
-    rho[3,2] = p_4_3; rho[3,1] = 1 - rho[3,2]; rho[3,3] = 0
+    rho[2,1] = 1; rho[2,2] = p_5_2*(1 - p_4_2) + p_4_2*(1 - p_5_2); rho[2,3] = p_5_2*p_4_2 # should this be in there? Otherwise it doesn't sum to 1; 
+    rho[3,2] = p_13_3; rho[3,1] = 1 - rho[3,2]; rho[3,3] = 0
     rho[4,1] = (1 - p_13_4 - p_23_4) * (1-p_5_4); rho[4,2] = p_13_4*(1-p_5_4) + (1 - p_13_4 - p_23_4)*p_5_4; rho[4,3] = p_13_4*p_5_4
     rho[5,1] = (1 - p_13_5 - p_23_5) * (1-p_4_5); rho[5,2] = p_13_5*(1-p_4_5) + (1 - p_13_5 - p_23_5)*p_4_5; rho[5,3] = p_13_5*p_4_5
     
@@ -70,9 +73,12 @@ jaeger_model = function(t,X,parms=NULL,...){
         p_13_5 = p_13_5,
         p_23_4 = p_23_4,
         p_23_5 = p_23_5,
-        p_4_3 = p_4_3,
+        # p_4_3 = p_4_3,
         p_4_5 = p_4_5,
-        p_5_4 = p_5_4
+        p_5_4 = p_5_4,
+        p_5_2 = p_5_2,
+        p_4_2 = p_4_2,
+        p_13_3 = p_13_3
       )
     ))
   })
@@ -80,7 +86,7 @@ jaeger_model = function(t,X,parms=NULL,...){
 
 time_scale = 1  # shifts the timescale by scaling both delta and vs and eta_leaf
 
-init = c(0, 0.6, 0.1, 0.1, 0, 0, 1) # Starts with some FD and LFY, and with a leaf production rate = 1 per unit t.
+init = c(0, 0, 0.1, 0.1, 0, 0, 1) # Starts with some FD and LFY, and with a leaf production rate = 1 per unit t.
 t = seq(0,200,by=0.1)
 
 v_lfy = 0.05;v_ap1 = 0.05
@@ -103,10 +109,13 @@ parms_ori = list(
   h_4_5 = 3.9369,
   h_5_4 = 3.6732,
   h_5_2 = 1.0239,
+  h_4_2 = 1,
+  K_13_3 = 0.35,
+  h_13_3 = 2,
   
   delta    = c(time_scale*2*c(0.05,0.05,0.05,v_lfy,v_ap1),0,0),
   v_35S    = time_scale*c(rep(0, 5)),		#check this. 
-  v1       = time_scale*1*c(0, 0.01, 0.01, 0.01, 0),
+  v1       = time_scale*1*c(0, 0, 0.01, 0.01, 0),
   v2       = time_scale*1*c(0.05,0.05,0.05,v_lfy,v_ap1),
   v3       = time_scale*2*c(0.05,0.05,0.05,v_lfy,v_ap1),
   eta_leaf = time_scale*0.01, #eta_leaf = time_scale*0.01
@@ -204,23 +213,23 @@ genotype_parms = function(genotype,parms){
   #Col 					#check
   if(genotype == '35S:FT'){ #check
     new_parms$v_35S[1] = exp_35S #1.3-1.8
-    new_parms$init <- c(10, 0.6, 0.1, 0.1, 0, 0, 0)
+    new_parms$init <- c(10, 0, 0.1, 0.1, 0, 0, 0)
   }
   if(genotype == '35S:LFY'){
     new_parms$v_35S[4] = exp_35S #nothing gets is fast enough (minimum = 5 Ros leaves)
-    new_parms$init <- c(0, 0.6, 0.1, 10.1, 0, 0, 1)
+    new_parms$init <- c(0, 0, 0.1, 10.1, 0, 0, 1)
   }
   if(genotype == '35S:TFL1'){ #not with this parameter
     new_parms$v_35S[2] = exp_35S #1
-    new_parms$init <- c(0, 10.7, 0.1, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 10, 0.1, 0.1, 0, 0, 1)
   }
   if(genotype == 'lfy-12'){   #check
     new_parms$mutants[4] = 1
-    new_parms$init <- c(0, 0.6, 0.1, 0, 0, 0, 1)
+    new_parms$init <- c(0, 0, 0.1, 0, 0, 0, 1)
   }
   if(genotype == 'ft-10'){	#check
     new_parms$mutants[1] = 1
-    new_parms$init <- c(0, 0.6, 0.1, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 0, 0.1, 0.1, 0, 0, 1)
   }
   if(genotype == 'tfl-1'){   #check
     new_parms$mutants[2] = 1
@@ -228,20 +237,20 @@ genotype_parms = function(genotype,parms){
   }
   if(genotype == 'fd-2'){    #check
     new_parms$mutants[3] = 0.75
-    new_parms$init <- c(0, 0.6, 0.025, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 0, 0.025, 0.1, 0, 0, 1)
   }
   if(genotype == 'fdp-1'){   #check
     new_parms$mutants[3] = 0.2
-    new_parms$init <- c(0, 0.6, 0.08, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 0, 0.08, 0.1, 0, 0, 1)
   }
   if(genotype == 'fd-2 fdp-1'){   #check
     new_parms$mutants[3] = 0.95
-    new_parms$init <- c(0, 0.6, 0.005, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 0, 0.005, 0.1, 0, 0, 1)
   }
   if(genotype == '35S:TFL1 fd-2'){  #check, exp_35S = 1
     new_parms$v_35S[2] = exp_35S
     new_parms$mutants[3] = 0.75
-    new_parms$init <- c(0, 10.7, 0.025, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 10, 0.025, 0.1, 0, 0, 1)
   }
   if(genotype == 'tfl1-1 fd-2'){   #check
     new_parms$mutants[2] = 1
@@ -251,22 +260,22 @@ genotype_parms = function(genotype,parms){
   if(genotype == '35S:FT fd-2'){   #check at exp_35S = 1.0
     new_parms$v_35S[1] = exp_35S
     new_parms$mutants[3] = 0.75
-    new_parms$init <- c(10, 0.6, 0.025, 0.1, 0, 0, 1)
+    new_parms$init <- c(10, 0, 0.025, 0.1, 0, 0, 1)
   }
   if(genotype == 'tfl1-1 fd-2 fdp-1'){  #check
     new_parms$mutants[2] = 1
     new_parms$mutants[3] = .95
-    new_parms$init <- c(0, 0.6, 0.005, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 0, 0.005, 0.1, 0, 0, 1)
   }
   if(genotype == '35S:TFL1 fd-2 fdp-1'){  #check
     new_parms$v_35S[2] = exp_35S
     new_parms$mutants[3] = .95
-    new_parms$init <- c(0, 10.7, 0.005, 0.1, 0, 0, 1)
+    new_parms$init <- c(0, 10, 0.005, 0.1, 0, 0, 1)
   }
   if(genotype == '35S:FT fd-2 fdp-1'){  #check, regardless of exp_35S
     new_parms$v_35S[1] = exp_35S
     new_parms$mutants[3] = .95
-    new_parms$init <- c(10, 0.1, 0.005, 0.1, 0, 0, 1)
+    new_parms$init <- c(10, 0, 0.005, 0.1, 0, 0, 1)
   }
   return(new_parms)
 }
