@@ -8,13 +8,13 @@ sourceCpp("Silly.cpp")
 
 time_scale = 1  # shifts the timescale by scaling both delta and vs and eta_leaf
 time_scale2 = 3
-init = c(0,0.6,.1,0.1,0,0,1) # Starts with some FD and LFY, and with a leaf production rate = 1 per unit t.
+init = c(0,0.1,.1,0.1,0,0,1) # Starts with some FD and LFY, and with a leaf production rate = 1 per unit t.
 t = seq(0, 50, by=0.1)
 
 v_lfy = 0.05;v_ap1 = 0.05
 op_parms <- c(sample(seq(0.01, 10, by = 0.01), 9), sample(seq(1, 4, by = 0.01), 8))
 init_parms <- op_parms
-low <- c(rep(0.025, 9), rep(1, 8))
+low <- c(rep(0.0001, 9), rep(1, 8))
 upp <- c(rep(10, 9), rep(4, 8))
 
 exp_35S = 1
@@ -143,7 +143,7 @@ eventsfun = function(t,y,parms,...){
   y
 }
 
-terminalroot = 3 # The 2nd root causes the simulation to stop
+terminalroot = 2 # The 2nd root causes the simulation to stop
 
 fit_model_new = function(parms){
   s1 <- ode(y = c(parms$init),
@@ -161,6 +161,7 @@ predict_leaves = function(parms){
   s1 = fit_model_new(parms)
   return(attributes(s1)[['troot']])
 }
+
 
 genotype_parms = function(genotype,parms){
   new_parms <- parms #parms
@@ -256,7 +257,7 @@ obj_fun4_helper <- function(params) {
   
   for(gen in data_model$Genotype){
     i = data_model$Genotype == gen
-    pred = predict_genotype(gen,c(j,baa2))*time_scale
+    pred = predict_genotype(gen, c(j, baa))*time_scale
     data_model$pred_R[i] = pred[1]
     data_model$pred_C[i] = pred[2]-pred[1]
   }
@@ -270,7 +271,7 @@ obj_fun4_helper <- function(params) {
   return(score)
 }
 
-out <- GenSA(op_parms, obj_fun4_helper, lower = low, upper = upp, control = list(temperature = 100, maxit = 1000000))
+out <- GenSA(op_parms, obj_fun4_helper, lower = low, upper = upp, control = list(temperature = 50))
 dat <- data.frame(out)
 data_final <- cbind(names(op_parms5), op_parms, dat)
 write.csv(data_final, file = sprintf("run_%f.csv", run))
