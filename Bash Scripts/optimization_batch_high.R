@@ -146,14 +146,17 @@ eventsfun = function(t,y,parms,...){
 terminalroot = 2 # The 2nd root causes the simulation to stop
 
 fit_model_new = function(parms){
-  s1 <- ode(y = c(parms$init),
+  s1 <- tryCatch({
+        ode(y = c(parms$init),
             times = t,
             func = c_jaeger_model_V3,
             parms=parms,
             method='lsoda',
             rootfun = root_fun,
             events = list(func = eventsfun,root=T,terminalroot=terminalroot))
-  
+      },
+      error = function(x) return(NA)
+      )  
   return(s1)
 }
 
